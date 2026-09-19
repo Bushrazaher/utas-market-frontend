@@ -35,7 +35,7 @@ export default function Sidebar({
     { id: 'saved', label: isEn ? 'Wishlist' : 'المفضلة', icon: <Heart size={18} /> },
     { id: 'orders', label: isEn ? 'My Orders' : 'طلباتي', icon: <Package size={18} /> },
     { id: 'settings', label: isEn ? 'Settings' : 'الإعدادات', icon: <Settings size={18} /> },
-    { id: 'ai-agent', label: isEn ? 'Nasr AI' : 'المساعد نصر', icon: <Sparkles size={18} className="text-[#1493d8]" /> },
+    { id: 'ai-agent', label: isEn ? 'Nasr AI' : 'المساعد أحمد', icon: <Sparkles size={18} className="text-[#1493d8]" /> },
   ];
 
   return (
@@ -99,7 +99,7 @@ export default function Sidebar({
                   }`}
                 >
                   <StoreIcon size={18} />
-                  <span>{isEn ? 'Seller Studio' : 'استوديو التاجر'}</span>
+                  <span>{isEn ? 'Seller Studio' : 'متجري'}</span>
                 </button>
               )}
 

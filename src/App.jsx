@@ -195,17 +195,19 @@ export default function App() {
         
         {/* الشريط العلوي الممتد بالكامل */}
         <TopBar 
-          currentView={currentView}
-          setCurrentView={navigateSafely} 
-          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
-          cartCount={totalCartCount}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          currentUser={currentUser}
-          onLogout={handleLogout}
-          language={language}
-          theme={theme}
-        />
+  currentView={currentView}
+  setCurrentView={navigateSafely} 
+  toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
+  cartCount={totalCartCount}
+  savedCount={savedItems.length}
+  searchQuery={searchQuery}
+  setSearchQuery={setSearchQuery}
+  currentUser={currentUser}
+  onLogout={handleLogout}
+  language={language}
+  setLanguage={setLanguage}
+  theme={theme}
+/>
        
         {/* مساحة عرض المحتوى والصفحات */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
