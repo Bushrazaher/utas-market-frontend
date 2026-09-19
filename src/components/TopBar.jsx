@@ -60,18 +60,17 @@ export default function TopBar({
           <Menu size={20} />
         </button>
 
-        <div 
-          onClick={() => setCurrentView('home')}
-          className="flex items-center gap-2 cursor-pointer transition hover:opacity-85 shrink-0"
-        >
-          <UtasLogo className="h-12 w-auto object-contain" />
-          <div className="hidden sm:block">
-            <span className="font-black text-xs tracking-tight block"></span>
-            <span className="text-[9px] text-slate-400 font-bold block -mt-0.5">
-              {isEn ? 'Campus Hub' : 'UTAS MARKET'}
-            </span>
-          </div>
-        </div>
+       <div 
+  onClick={() => setCurrentView('home')}
+  className="flex items-center gap-2 cursor-pointer transition hover:opacity-85 shrink-0"
+>
+  <UtasLogo className="h-9 sm:h-12 w-auto object-contain" />
+  <div className="hidden sm:block">
+    <span className="text-[9px] text-slate-400 font-bold block -mt-0.5">
+      {isEn ? 'Campus Hub' : 'UTAS MARKET'}
+    </span>
+  </div>
+</div>
 
         {showSearch && (
           <div className="relative hidden md:block w-60 lg:w-72 mx-2">

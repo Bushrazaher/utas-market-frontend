@@ -16,6 +16,7 @@ import CartView from './components/CartView';
 import NasrAiWidget from './components/NasrAiWidget';
 import SettingsView from './components/SettingsView';
 import { API_URL } from './config';
+import BottomNav from './components/BottomNav';
 
 export default function App() {
   const [currentView, setCurrentView] = useState('home');
@@ -245,7 +246,7 @@ export default function App() {
           theme={theme}
         />
        
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
+       <main className="flex-1 overflow-y-auto p-3 sm:p-6 md:p-8 pb-24 md:pb-8">
           {currentView === 'home' && (
             <HomeView 
               stores={stores}
@@ -375,6 +376,16 @@ export default function App() {
             />
           )}
         </main>
+        {/* شريط التنقل السفلي للهواتف فقط */}
+      <BottomNav 
+        currentView={currentView}
+        setCurrentView={navigateSafely}
+        cartCount={totalCartCount}
+        currentUser={currentUser}
+        language={language}
+        theme={theme}
+      />
+    
       </div>
 
       {currentView !== 'admin' && currentUser?.role !== 'admin' && (
@@ -385,6 +396,15 @@ export default function App() {
           theme={theme}
         />
       )}
+      <BottomNav 
+        currentView={currentView}
+        setCurrentView={navigateSafely}
+        cartCount={totalCartCount}
+        currentUser={currentUser}
+        language={language}
+        theme={theme}
+      />
+      
     </div>
   );
 }
