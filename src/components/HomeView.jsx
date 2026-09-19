@@ -107,13 +107,12 @@ export default function HomeView({
           </div>
 
           {/* شعار UTAS المدمج الزجاجي (مخفي في الهاتف لتوفير المساحة) */}
-          <div className="hidden md:flex flex-col items-center justify-center p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl shrink-0">
-            <div className="p-4 bg-white rounded-2xl shadow-inner mb-3">
-              <UtasLogo className="h-16 w-auto object-contain" />
-            </div>
-            <span className="text-[11px] font-black tracking-widest text-slate-300 uppercase">UTAS Hub</span>
-          </div>
-
+       {/* شعار UTAS المفرغ النقي */}
+<div className="hidden md:flex flex-col items-center justify-center p-8    shadow-3xl shrink-0">
+  <div className="p-2 mb-1 flex items-center justify-center">
+    <UtasLogo className="h-30 w-auto" />
+  </div>
+</div>
         </div>
       </div>
 
