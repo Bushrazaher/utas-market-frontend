@@ -62,20 +62,31 @@ export default function App() {
   const [savedItems, setSavedItems] = useState([]);
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
+  const [stores, setStores] = useState([]);
 
   // 3. جلب البيانات من السيرفر
   const fetchAllData = () => {
-      fetch(`${API_URL}/api/products`)
+    // جلب المنتجات
+    fetch(`${API_URL}/api/products`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setProducts(data);
       })
       .catch(() => {});
 
+    // جلب الطلبات
     fetch(`${API_URL}/api/orders`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setOrders(data);
+      })
+      .catch(() => {});
+
+    // جلب المتاجر المعتمدة
+    fetch(`${API_URL}/api/stores`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setStores(data);
       })
       .catch(() => {});
   };
@@ -177,7 +188,6 @@ export default function App() {
       }`} 
       dir={language === 'ar' ? 'rtl' : 'ltr'}
     >
-      
       {/* 1. القائمة الجانبية (Sidebar) */}
       <Sidebar 
         currentView={currentView} 
@@ -192,22 +202,21 @@ export default function App() {
 
       {/* 2. منطقة العرض الرئيسية */}
       <div className="flex-1 flex flex-col h-screen min-w-0 overflow-hidden">
-        
         {/* الشريط العلوي الممتد بالكامل */}
         <TopBar 
-  currentView={currentView}
-  setCurrentView={navigateSafely} 
-  toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
-  cartCount={totalCartCount}
-  savedCount={savedItems.length}
-  searchQuery={searchQuery}
-  setSearchQuery={setSearchQuery}
-  currentUser={currentUser}
-  onLogout={handleLogout}
-  language={language}
-  setLanguage={setLanguage}
-  theme={theme}
-/>
+          currentView={currentView}
+          setCurrentView={navigateSafely} 
+          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
+          cartCount={totalCartCount}
+          savedCount={savedItems.length}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          currentUser={currentUser}
+          onLogout={handleLogout}
+          language={language}
+          setLanguage={setLanguage}
+          theme={theme}
+        />
        
         {/* مساحة عرض المحتوى والصفحات */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
@@ -246,6 +255,7 @@ export default function App() {
 
           {currentView === 'stores' && (
             <StoresView 
+              stores={stores}
               setCurrentView={navigateSafely} 
               language={language}
               theme={theme}
@@ -348,7 +358,6 @@ export default function App() {
           theme={theme}
         />
       )}
-
     </div>
   );
 }
