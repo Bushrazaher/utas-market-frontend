@@ -423,13 +423,16 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={setupLoading}
-            className="w-full bg-black hover:bg-slate-800 text-white font-black text-xs py-3 rounded-2xl transition shadow-md active:scale-98 disabled:opacity-50"
-          >
-            {setupLoading ? (isEn ? 'Saving...' : 'جاري الحفظ...') : (isEn ? 'Save and Start Selling' : 'حفظ وبدء البيع')}
-          </button>
+        <button
+  onClick={async () => {
+    if (onRefreshUser) await onRefreshUser();
+    else window.location.reload();
+  }}
+  className="tactile-btn inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#1493d8] text-white hover:bg-[#117bb5] text-xs font-bold transition shadow-sm"
+>
+  <RefreshCw size={14} />
+  <span>{isEn ? 'Check Approval Now' : 'التحقق من حالة القبول الآن'}</span>
+</button>
         </form>
 
       </div>

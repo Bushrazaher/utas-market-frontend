@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 import HomeView from './components/HomeView';
@@ -22,11 +22,10 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // 1. إدارة اللغة والمظهر العام مع التخزين المحلي
+  // 1. اللغة والمظهر
   const [language, setLanguage] = useState(() => localStorage.getItem('utas_lang') || 'ar');
   const [theme, setTheme] = useState(() => localStorage.getItem('utas_theme') || 'light');
 
-  // مزامنة اتجاه الصفحة وفئات الـ Dark Mode في الـ HTML
   useEffect(() => {
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = language;
@@ -37,7 +36,7 @@ export default function App() {
     }
   }, [language, theme]);
 
-  // 2. إدارة بيانات المستخدم وجلسة الدخول
+  // 2. إدارة جلسة المستخدم
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const savedUser = localStorage.getItem('utas_user');
@@ -54,6 +53,7 @@ export default function App() {
       email: '',
       role: 'buyer',
       storeName: '',
+      storeStatus: 'none',
       isStoreConfigured: false
     };
   });
@@ -64,38 +64,70 @@ export default function App() {
   const [products, setProducts] = useState([]);
   const [stores, setStores] = useState([]);
 
-  // 3. جلب البيانات من السيرفر
-  const fetchAllData = () => {
-    // جلب المنتجات
+  // 3. جلب المتاجر والمنتجات والطلبات
+  const fetchAllData = useCallback(() => {
     fetch(`${API_URL}/api/products`)
       .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) setProducts(data);
-      })
+      .then((data) => { if (Array.isArray(data)) setProducts(data); })
       .catch(() => {});
 
-    // جلب الطلبات
     fetch(`${API_URL}/api/orders`)
       .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) setOrders(data);
-      })
+      .then((data) => { if (Array.isArray(data)) setOrders(data); })
       .catch(() => {});
 
-    // جلب المتاجر المعتمدة
     fetch(`${API_URL}/api/stores`)
       .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) setStores(data);
-      })
+      .then((data) => { if (Array.isArray(data)) setStores(data); })
       .catch(() => {});
-  };
+  }, []);
+
+  // 4. مزامنة بيانات حساب التاجر مع قاعدة البيانات
+  const refreshUserProfile = useCallback(async () => {
+    if (!currentUser?.isLoggedIn || !currentUser?.email) return;
+
+    try {
+      const res = await fetch(`${API_URL}/api/auth/profile/${currentUser.email}`);
+      if (res.ok) {
+        const freshData = await res.json();
+        
+        // التحقق إن كانت هناك ترقية أو تغيير في حالة المتجر
+        if (
+          freshData.storeStatus !== currentUser.storeStatus || 
+          freshData.role !== currentUser.role || 
+          freshData.isStoreConfigured !== currentUser.isStoreConfigured
+        ) {
+          const updatedUser = {
+            ...currentUser,
+            role: freshData.role,
+            storeName: freshData.storeName,
+            storeStatus: freshData.storeStatus,
+            isStoreConfigured: freshData.isStoreConfigured
+          };
+          setCurrentUser(updatedUser);
+          localStorage.setItem('utas_user', JSON.stringify(updatedUser));
+          fetchAllData(); // تحديث المتاجر المعروضة فوراً
+        }
+      }
+    } catch (err) {
+      console.error('تعذر مزامنة الملف الشخصي:', err);
+    }
+  }, [currentUser, fetchAllData]);
 
   useEffect(() => {
     fetchAllData();
-  }, []);
+  }, [fetchAllData]);
 
-  // تسجيل الخروج والعودة المباشرة للصفحة الرئيسية
+  // فحص تلقائي كل 8 ثوانٍ في حال كان المتجر قيد المراجعة لمزامنته لحظياً
+  useEffect(() => {
+    if (currentUser?.isLoggedIn && currentUser?.storeStatus === 'pending') {
+      const timer = setInterval(() => {
+        refreshUserProfile();
+      }, 8000);
+      return () => clearInterval(timer);
+    }
+  }, [currentUser, refreshUserProfile]);
+
   const handleLogout = () => {
     localStorage.removeItem('utas_token');
     localStorage.removeItem('utas_user');
@@ -105,27 +137,27 @@ export default function App() {
       email: '',
       role: 'buyer',
       storeName: '',
+      storeStatus: 'none',
       isStoreConfigured: false
     });
     setCurrentView('home');
   };
 
-  // حماية التوجيه والصلاحيات
   const navigateSafely = (targetView) => {
     if (targetView === 'seller') {
       if (!currentUser.isLoggedIn) {
-        alert(language === 'en' ? 'Please log in with your university account to access Seller Studio.' : 'يجب تسجيل الدخول أولاً بحسابك الجامعي للوصول إلى استوديو البائع.');
+        alert(language === 'en' ? 'Please log in to access Seller Studio.' : 'يجب تسجيل الدخول أولاً بحسابك الجامعي.');
         setCurrentView('auth');
         return;
       }
-      if (currentUser.role !== 'seller' && currentUser.role !== 'admin') {
-        alert(language === 'en' ? 'Your account is registered as a buyer. Please create a seller account.' : 'حسابك الحالي مخصص للشراء فقط. يمكنك إنشاء حساب جديد كتاجر.');
+      if (currentUser.role !== 'seller' && currentUser.role !== 'admin' && currentUser.storeStatus !== 'pending') {
+        alert(language === 'en' ? 'Your account is currently a buyer account.' : 'حسابك مسجل حالياً كطالب مشتري.');
         return;
       }
     }
 
     if (targetView === 'admin' && currentUser.role !== 'admin') {
-      alert(language === 'en' ? 'Unauthorized access to the Admin Dashboard.' : 'غير مصرح لك بدخول لوحة الإشراف الجامعية.');
+      alert(language === 'en' ? 'Unauthorized access.' : 'غير مصرح لك بدخول لوحة الإشراف.');
       return;
     }
 
@@ -134,11 +166,9 @@ export default function App() {
 
   const addToCart = (product) => {
     if (!product) return;
-
-    const numericPrice =
-      typeof product.price === 'string'
-        ? parseFloat(product.price.replace(/[^\d.]/g, '')) || 0
-        : Number(product.price) || 0;
+    const numericPrice = typeof product.price === 'string'
+      ? parseFloat(product.price.replace(/[^\d.]/g, '')) || 0
+      : Number(product.price) || 0;
 
     setCartItems((prev) => {
       const existing = prev.find((item) => (item._id || item.id) === (product._id || product.id));
@@ -188,7 +218,6 @@ export default function App() {
       }`} 
       dir={language === 'ar' ? 'rtl' : 'ltr'}
     >
-      {/* 1. القائمة الجانبية (Sidebar) */}
       <Sidebar 
         currentView={currentView} 
         setCurrentView={navigateSafely} 
@@ -200,9 +229,7 @@ export default function App() {
         theme={theme}
       />
 
-      {/* 2. منطقة العرض الرئيسية */}
       <div className="flex-1 flex flex-col h-screen min-w-0 overflow-hidden">
-        {/* الشريط العلوي الممتد بالكامل */}
         <TopBar 
           currentView={currentView}
           setCurrentView={navigateSafely} 
@@ -218,10 +245,10 @@ export default function App() {
           theme={theme}
         />
        
-        {/* مساحة عرض المحتوى والصفحات */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
           {currentView === 'home' && (
             <HomeView 
+              stores={stores}
               setCurrentView={navigateSafely} 
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
@@ -266,6 +293,7 @@ export default function App() {
             <SellerDashboard 
               currentUser={currentUser}
               setCurrentUser={setCurrentUser}
+              onRefreshUser={refreshUserProfile}
               setCurrentView={navigateSafely} 
               language={language}
               theme={theme}
@@ -349,7 +377,6 @@ export default function App() {
         </main>
       </div>
 
-      {/* المساعد الذكي نصر العائم */}
       {currentView !== 'admin' && currentUser?.role !== 'admin' && (
         <NasrAiWidget 
           onAddToCart={addToCart} 
