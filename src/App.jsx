@@ -232,19 +232,20 @@ export default function App() {
 
       <div className="flex-1 flex flex-col h-screen min-w-0 overflow-hidden">
         <TopBar 
-          currentView={currentView}
-          setCurrentView={navigateSafely} 
-          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
-          cartCount={totalCartCount}
-          savedCount={savedItems.length}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          currentUser={currentUser}
-          onLogout={handleLogout}
-          language={language}
-          setLanguage={setLanguage}
-          theme={theme}
-        />
+  currentView={currentView}
+  setCurrentView={navigateSafely} 
+  toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
+  cartCount={totalCartCount}
+  savedCount={savedItems.length}
+  searchQuery={searchQuery}
+  setSearchQuery={setSearchQuery}
+  currentUser={currentUser}
+  onLogout={handleLogout}
+  language={language}
+  setLanguage={setLanguage}
+  theme={theme}
+  setTheme={setTheme}
+/>
        
        <main className="flex-1 overflow-y-auto p-3 sm:p-6 md:p-8 pb-24 md:pb-8">
           {currentView === 'home' && (

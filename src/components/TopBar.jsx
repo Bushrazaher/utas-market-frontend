@@ -2,12 +2,16 @@ import React from 'react';
 import { 
   Menu, 
   Search, 
-  ShoppingBag, 
-  LogOut, 
-  Shield, 
   Globe, 
-  Heart, 
-  Bell 
+  Moon, 
+  Sun, 
+  Bell, 
+  ShoppingBag, 
+  Bookmark, 
+  ShieldCheck, 
+  LogIn, 
+  LogOut,
+  X
 } from 'lucide-react';
 import UtasLogo from './UtasLogo';
 
@@ -17,225 +21,215 @@ export default function TopBar({
   toggleSidebar,
   cartCount = 0,
   savedCount = 0,
-  unreadNotificationsCount = 0,
   searchQuery = '',
-  setSearchQuery,
+  setSearchQuery = () => {},
   currentUser,
   onLogout,
   language = 'ar',
-  setLanguage,
-  theme = 'light'
+  setLanguage = () => {},
+  theme = 'light',
+  setTheme = () => {}
 }) {
-  const isAdmin = currentView === 'admin' || currentUser?.role === 'admin';
-  const isAuthPage = currentView === 'auth';
-  const showSearch = !isAdmin && !isAuthPage;
   const isEn = language === 'en';
   const isDark = theme === 'dark';
 
-  // دالة تبديل اللغة وتحديث اتجاه الصفحة والتخزين
-  const handleToggleLanguage = () => {
-    const nextLang = language === 'ar' ? 'en' : 'ar';
-    if (setLanguage) {
-      setLanguage(nextLang);
-    }
-    localStorage.setItem('utas_lang', nextLang);
-    document.documentElement.dir = nextLang === 'ar' ? 'rtl' : 'ltr';
-    document.documentElement.lang = nextLang;
+  // دالة تبديل الثيم
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('utas_theme', newTheme);
+  };
+
+  // دالة تبديل اللغة
+  const toggleLanguage = () => {
+    const newLang = language === 'ar' ? 'en' : 'ar';
+    setLanguage(newLang);
+    localStorage.setItem('utas_lang', newLang);
   };
 
   return (
-    <header className={`w-full border-b px-4 sm:px-6 py-2.5 flex items-center justify-between sticky top-0 z-30 shadow-xs shrink-0 transition-colors duration-200 ${
-      isDark ? 'bg-slate-900/95 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
-    }`}>
+    <header 
+      className={`h-16 sm:h-20 border-b px-4 sm:px-6 md:px-8 flex items-center justify-between gap-3 sticky top-0 z-30 transition-colors duration-200 ${
+        isDark 
+          ? 'bg-slate-900/90 border-slate-800 text-white backdrop-blur-md' 
+          : 'bg-white/90 border-slate-200 text-slate-800 backdrop-blur-md shadow-2xs'
+      }`}
+      dir={isEn ? 'ltr' : 'rtl'}
+    >
       
-      {/* القسم الأيمن: زر القائمة، الشعار، والبحث */}
-      <div className="flex items-center gap-3">
+      {/* 1. الجانب الأيمن: زر القائمة الجانبية والشعار */}
+      <div className="flex items-center gap-3 shrink-0">
         <button
           onClick={toggleSidebar}
-          className={`p-2 rounded-xl border transition flex items-center justify-center shrink-0 ${
-            isDark ? 'border-slate-800 text-slate-300 hover:bg-slate-800' : 'border-slate-200 text-slate-700 hover:bg-slate-100'
+          className={`p-2 rounded-2xl border transition md:hidden ${
+            isDark ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
           }`}
-          title={isEn ? 'Toggle Menu' : 'القائمة'}
+          title="القائمة"
         >
-          <Menu size={20} />
+          <Menu size={18} />
         </button>
 
-       <div 
-  onClick={() => setCurrentView('home')}
-  className="flex items-center gap-2 cursor-pointer transition hover:opacity-85 shrink-0"
->
-  <UtasLogo className="h-9 sm:h-12 w-auto object-contain" />
-  <div className="hidden sm:block">
-    <span className="text-[9px] text-slate-400 font-bold block -mt-0.5">
-      {isEn ? 'Campus Hub' : 'UTAS MARKET'}
-    </span>
-  </div>
-</div>
+        <div 
+          onClick={() => setCurrentView('home')} 
+          className="flex items-center gap-2 cursor-pointer select-none"
+        >
+          <UtasLogo variant="inline" className="scale-90 sm:scale-100" />
+          <span className="text-[10px] font-black tracking-widest text-[#1493d8] uppercase hidden lg:inline">
+          
+          </span>
+        </div>
+      </div>
 
-        {showSearch && (
-          <div className="relative hidden md:block w-60 lg:w-72 mx-2">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={isEn ? 'Search campus marketplace...' : 'ابحث عن مذكرات، كوكيز، مشاريع...'}
-              className={`w-full border rounded-xl px-9 py-2 text-xs outline-none focus:border-[#1493d8] transition ${
+      {/* 2. المنتصف: شريط البحث الجامعي (يظهر في الشاشات المتوسطة والأكبر) */}
+      <div className="hidden md:flex flex-1 max-w-md mx-2 relative">
+        <Search 
+          size={16} 
+          className="absolute top-1/2 -translate-y-1/2 right-3.5 rtl:right-3.5 rtl:left-auto ltr:left-3.5 ltr:right-auto text-slate-400 pointer-events-none" 
+        />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder={isEn ? "Search notes, cookies, projects..." : "ابحث عن مذكرات، كوكيز، مشاريع..."}
+          className={`w-full py-2 text-xs rounded-2xl border outline-none transition rtl:pr-9 rtl:pl-8 ltr:pl-9 ltr:pr-8 ${
+            isDark 
+              ? 'bg-slate-800/80 border-slate-700 text-white focus:border-[#1493d8]' 
+              : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-[#1493d8]'
+          }`}
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="absolute top-1/2 -translate-y-1/2 left-2.5 rtl:left-2.5 rtl:right-auto ltr:right-2.5 ltr:left-auto text-slate-400 hover:text-slate-600 dark:hover:text-white"
+          >
+            <X size={14} />
+          </button>
+        )}
+      </div>
+
+      {/* شارة المشرف العليا إذا كان الحساب مشرفاً */}
+      {currentUser?.role === 'admin' && (
+        <div className="hidden xl:flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-black">
+          <ShieldCheck size={14} />
+          <span>{isEn ? 'Supervision Mode' : 'نظام الإشراف والرقابة العليا'}</span>
+        </div>
+      )}
+
+      {/* 3. الجانب الأيسر: زر الدارك مود، اللغة، السلة، الحساب */}
+      <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+        
+        {/* زر التبديل للوضع الليلي والنهاري (Dark / Light Mode) */}
+        <button
+          onClick={toggleTheme}
+          className={`p-2 rounded-2xl border transition flex items-center justify-center ${
+            isDark 
+              ? 'bg-slate-800 border-slate-700 text-amber-400 hover:bg-slate-700' 
+              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100 shadow-2xs'
+          }`}
+          title={isDark ? (isEn ? 'Switch to Light Mode' : 'تفعيل الوضع النهاري') : (isEn ? 'Switch to Dark Mode' : 'تفعيل الوضع الليلي')}
+        >
+          {isDark ? <Sun size={17} className="animate-spin-slow" /> : <Moon size={17} />}
+        </button>
+
+        {/* زر تبديل اللغة */}
+        <button
+          onClick={toggleLanguage}
+          className={`px-2.5 py-1.5 rounded-2xl border text-xs font-bold transition flex items-center gap-1.5 ${
+            isDark 
+              ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700' 
+              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 shadow-2xs'
+          }`}
+          title={isEn ? 'تغيير إلى العربية' : 'Switch to English'}
+        >
+          <Globe size={14} className="text-[#1493d8]" />
+          <span>{isEn ? 'عربي' : 'EN'}</span>
+        </button>
+
+        {/* زر الإشعارات */}
+        <button
+          onClick={() => setCurrentView('notifications')}
+          className={`p-2 rounded-2xl border transition relative hidden sm:flex items-center justify-center ${
+            isDark 
+              ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700' 
+              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100 shadow-2xs'
+          }`}
+          title={isEn ? 'Notifications' : 'الإشعارات'}
+        >
+          <Bell size={17} />
+        </button>
+
+        {/* زر المحفوظات */}
+        <button
+          onClick={() => setCurrentView('saved')}
+          className={`p-2 rounded-2xl border transition relative hidden sm:flex items-center justify-center ${
+            isDark 
+              ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700' 
+              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100 shadow-2xs'
+          }`}
+          title={isEn ? 'Saved Items' : 'المفضلة'}
+        >
+          <Bookmark size={17} />
+          {savedCount > 0 && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center">
+              {savedCount}
+            </span>
+          )}
+        </button>
+
+        {/* زر السلة */}
+        <button
+          onClick={() => setCurrentView('cart')}
+          className={`p-2 rounded-2xl border transition relative flex items-center justify-center ${
+            isDark 
+              ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700' 
+              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100 shadow-2xs'
+          }`}
+          title={isEn ? 'Cart' : 'السلة'}
+        >
+          <ShoppingBag size={17} />
+          {cartCount > 0 && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#1493d8] text-white text-[9px] font-black flex items-center justify-center animate-pulse">
+              {cartCount}
+            </span>
+          )}
+        </button>
+
+        {/* حالة الحساب: تسجيل الدخول أو معلومات المستخدم */}
+        {currentUser?.isLoggedIn ? (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentView(currentUser.role === 'admin' ? 'admin' : currentUser.role === 'seller' ? 'seller' : 'settings')}
+              className={`px-3 py-1.5 rounded-2xl border text-xs font-black transition hidden md:flex flex-col text-right ${
                 isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
               }`}
-            />
-            <Search size={15} className={`absolute top-1/2 -translate-y-1/2 text-slate-400 ${isEn ? 'left-3' : 'right-3'}`} />
-          </div>
-        )}
-
-        {isAdmin && (
-          <div className={`hidden sm:flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-xl border mx-2 ${
-            isDark ? 'bg-slate-800 border-slate-700 text-slate-200' : 'bg-slate-100 border-slate-200 text-slate-700'
-          }`}>
-            <Shield size={14} className="text-[#1493d8]" />
-            <span>{isEn ? 'Admin Supervision Panel' : 'نظام الإشراف والرقابة العليا'}</span>
-          </div>
-        )}
-      </div>
-
-      {/* القسم الأيسر: أيقونة اللغة، المفضلات، الإشعارات، السلة، والحساب */}
-      <div className="flex items-center gap-2 sm:gap-2.5">
-        
-        {/* 1. زر تبديل اللغة (يظهر دائماً للزائر وللمسجل) */}
-        <button
-          onClick={handleToggleLanguage}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-bold transition shrink-0 ${
-            isDark 
-              ? 'border-slate-800 text-slate-300 hover:bg-slate-800' 
-              : 'border-slate-200 text-slate-700 hover:bg-slate-100'
-          }`}
-          title={isEn ? 'التبديل إلى العربية' : 'Switch to English'}
-        >
-          <Globe size={15} className="text-[#1493d8]" />
-          <span className="text-[11px] font-mono font-bold">{isEn ? 'عربي' : 'EN'}</span>
-        </button>
-
-        {/* ========================================================= */}
-        {/* الحالة الأولى: عند تسجيل الدخول (Logged In User)          */}
-        {/* ========================================================= */}
-        {currentUser?.isLoggedIn ? (
-          <>
-            {/* أيقونة المفضلات (القلب) */}
-            <button
-              onClick={() => setCurrentView('saved')}
-              className={`relative p-2 rounded-xl transition shrink-0 ${
-                currentView === 'saved'
-                  ? 'text-rose-600 bg-rose-50 dark:bg-rose-950/40'
-                  : isDark ? 'text-slate-300 hover:bg-slate-800 hover:text-rose-400' : 'text-slate-600 hover:bg-slate-100 hover:text-rose-600'
-              }`}
-              title={isEn ? 'Wishlist' : 'المفضلة'}
             >
-              <Heart size={19} className={currentView === 'saved' ? 'fill-current' : ''} />
-              {savedCount > 0 && (
-                <span className="absolute top-1 right-1 bg-rose-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-black">
-                  {savedCount}
-                </span>
-              )}
+              <span className="leading-tight">{currentUser.name}</span>
+              <span className="text-[9px] text-[#1493d8] font-bold">
+                {currentUser.role === 'admin' ? (isEn ? 'Admin' : 'مشرف') : currentUser.role === 'seller' ? (isEn ? 'Merchant' : 'تاجر') : (isEn ? 'Student' : 'طالب')}
+              </span>
             </button>
 
-            {/* أيقونة الإشعارات (الجرس) */}
             <button
-              onClick={() => setCurrentView('notifications')}
-              className={`relative p-2 rounded-xl transition shrink-0 ${
-                currentView === 'notifications'
-                  ? 'text-[#1493d8] bg-sky-50 dark:bg-sky-950/40'
-                  : isDark ? 'text-slate-300 hover:bg-slate-800 hover:text-[#1493d8]' : 'text-slate-600 hover:bg-slate-100 hover:text-[#1493d8]'
-              }`}
-              title={isEn ? 'Notifications' : 'الإشعارات'}
+              onClick={onLogout}
+              className="p-2 rounded-2xl border border-rose-200 dark:border-rose-900/40 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition flex items-center gap-1 text-xs font-bold"
+              title={isEn ? 'Sign Out' : 'تسجيل الخروج'}
             >
-              <Bell size={19} />
-              {unreadNotificationsCount > 0 && (
-                <span className="absolute top-1 right-1 bg-[#1493d8] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-black animate-pulse">
-                  {unreadNotificationsCount}
-                </span>
-              )}
+              <LogOut size={16} />
+              <span className="hidden sm:inline">{isEn ? 'Exit' : 'خروج'}</span>
             </button>
-
-            {/* سلة المشتريات */}
-            {!isAdmin && !isAuthPage && (
-              <button
-                onClick={() => setCurrentView('cart')}
-                className={`relative p-2 rounded-xl transition shrink-0 ${
-                  currentView === 'cart'
-                    ? 'text-[#1493d8] bg-sky-50 dark:bg-sky-950/40'
-                    : isDark ? 'text-slate-300 hover:bg-slate-800' : 'text-slate-600 hover:bg-slate-100'
-                }`}
-                title={isEn ? 'Shopping Cart' : 'سلة المشتريات'}
-              >
-                <ShoppingBag size={19} />
-                {cartCount > 0 && (
-                  <span className="absolute top-1 right-1 bg-[#1493d8] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-black">
-                    {cartCount}
-                  </span>
-                )}
-              </button>
-            )}
-
-            {/* بيانات المستخدم وزر تسجيل الخروج */}
-            <div className={`flex items-center gap-2.5 px-2 border-slate-200 ${isEn ? 'border-l' : 'border-r'}`}>
-              <div className="hidden sm:block text-right">
-                <span className="block text-xs font-bold leading-tight">{currentUser.name}</span>
-                <span className="text-[10px] text-slate-400 font-medium">
-                  {currentUser.role === 'admin' 
-                    ? (isEn ? 'Admin' : 'مشرف') 
-                    : currentUser.role === 'seller' 
-                    ? (currentUser.storeName || (isEn ? 'Seller' : 'تاجر')) 
-                    : (isEn ? 'Buyer' : 'طالب')}
-                </span>
-              </div>
-              <button
-                onClick={onLogout}
-                className="flex items-center gap-1 bg-slate-100 hover:bg-red-50 hover:text-red-600 text-slate-600 text-xs font-bold px-2.5 py-1.5 rounded-xl transition shrink-0"
-                title={isEn ? 'Logout' : 'تسجيل الخروج'}
-              >
-                <LogOut size={13} />
-                <span className="hidden sm:inline">{isEn ? 'Exit' : 'خروج'}</span>
-              </button>
-            </div>
-          </>
+          </div>
         ) : (
-          /* ========================================================= */
-          /* الحالة الثانية: غير مسجل الدخول (Guest)                   */
-          /* ========================================================= */
-          <>
-            {/* سلة المشتريات للزائر */}
-            {!isAuthPage && (
-              <button
-                onClick={() => setCurrentView('cart')}
-                className={`relative p-2 rounded-xl transition shrink-0 ${
-                  currentView === 'cart'
-                    ? 'text-[#1493d8] bg-sky-50 dark:bg-sky-950/40'
-                    : isDark ? 'text-slate-300 hover:bg-slate-800' : 'text-slate-600 hover:bg-slate-100'
-                }`}
-                title={isEn ? 'Shopping Cart' : 'سلة المشتريات'}
-              >
-                <ShoppingBag size={19} />
-                {cartCount > 0 && (
-                  <span className="absolute top-1 right-1 bg-[#1493d8] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-black">
-                    {cartCount}
-                  </span>
-                )}
-              </button>
-            )}
-
-            {!isAuthPage && (
-              <button
-                onClick={() => setCurrentView('auth')}
-                className={`text-xs font-bold px-3.5 py-1.5 rounded-xl transition shrink-0 ${
-                  isDark ? 'bg-white text-slate-950 hover:bg-slate-200' : 'bg-black text-white hover:bg-slate-800'
-                }`}
-              >
-                {isEn ? 'Sign In' : 'تسجيل الدخول'}
-              </button>
-            )}
-          </>
+          <button
+            onClick={() => setCurrentView('auth')}
+            className="px-3.5 py-2 rounded-2xl bg-black dark:bg-white text-white dark:text-black text-xs font-black hover:opacity-90 transition flex items-center gap-1.5 shadow-sm"
+          >
+            <LogIn size={15} />
+            <span>{isEn ? 'Sign In' : 'تسجيل الدخول'}</span>
+          </button>
         )}
 
       </div>
+
     </header>
   );
 }
