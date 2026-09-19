@@ -1,85 +1,84 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { 
-  Compass, 
-  Store, 
-  ShoppingBag, 
   Sparkles, 
-  Check, 
+  ArrowRight, 
   ArrowLeft, 
-  ArrowRight,
-  ShieldCheck, 
+  Store, 
+  Compass, 
   BookOpen, 
-  Utensils, 
-  PenTool, 
-  Layers
+  Code, 
+  Coffee, 
+  Layers, 
+  ShieldCheck,
+  TrendingUp,
+  CheckCircle2
 } from 'lucide-react';
 import UtasLogo from './UtasLogo';
-import { API_URL } from '../config';
 
-export default function HomeView({ setCurrentView, onAddToCart, language = 'ar', theme = 'light' }) {
-  const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [addedId, setAddedId] = useState(null);
-
+export default function HomeView({ 
+  stores = [], 
+  setCurrentView, 
+  searchQuery, 
+  setSearchQuery, 
+  onAddToCart, 
+  language = 'ar', 
+  theme = 'light' 
+}) {
   const isEn = language === 'en';
   const isDark = theme === 'dark';
-
-  useEffect(() => {
-   fetch(`${API_URL}/api/products`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setFeaturedProducts(data.slice(-4).reverse());
-        }
-        setIsLoading(false);
-      })
-      .catch(() => setIsLoading(false));
-  }, []);
-
-  const handleAdd = (product) => {
-    if (onAddToCart) onAddToCart(product);
-    setAddedId(product._id || product.id);
-    setTimeout(() => setAddedId(null), 1500);
-  };
+  const ArrowIcon = isEn ? ArrowRight : ArrowLeft;
 
   const quickCategories = [
-    { title: isEn ? 'Books & Notes' : 'كتب ومذكرات', icon: <BookOpen size={18} />, cat: 'كتب ومذكرات' },
-    { title: isEn ? 'Services & Design' : 'خدمات وتصاميم', icon: <PenTool size={18} />, cat: 'خدمات طلابية' },
-    { title: isEn ? 'Food & Snacks' : 'سناكس ومأكولات', icon: <Utensils size={18} />, cat: 'مأكولات ومشروبات' },
-    { title: isEn ? 'All Categories' : 'كل التصنيفات', icon: <Layers size={18} />, action: 'categories' },
+    { id: 'notes', name: isEn ? 'Books & Notes' : 'مذكرات وكتب', sub: isEn ? 'Browse now' : 'تصفح الآن', icon: <BookOpen size={20} className="text-sky-500" /> },
+    { id: 'projects', name: isEn ? 'Services & Design' : 'مشاريع وخدمات', sub: isEn ? 'Browse now' : 'تصفح الآن', icon: <Code size={20} className="text-indigo-500" /> },
+    { id: 'food', name: isEn ? 'Food & Snacks' : 'مأكولات وحلويات', sub: isEn ? 'Order fresh' : 'طازجة يومياً', icon: <Coffee size={20} className="text-amber-500" /> },
+    { id: 'all', name: isEn ? 'All Categories' : 'جميع الأقسام', sub: isEn ? 'Explore all' : 'استكشف الكل', icon: <Layers size={20} className="text-emerald-500" /> }
   ];
 
   return (
-    <div className="max-w-7xl mx-auto py-2 space-y-8">
+    <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8" dir={isEn ? 'ltr' : 'rtl'}>
       
-      {/* البنر الترحيبي */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-black to-slate-950 text-white p-6 sm:p-10 border border-slate-800 shadow-xl">
-        <div className="absolute top-0 left-0 w-80 h-80 bg-[#1493d8]/20 rounded-full blur-3xl pointer-events-none"></div>
+      {/* 1. البنر الإعلاني المطور المتجاوب */}
+      <div className={`relative overflow-hidden rounded-3xl border transition-all duration-300 ${
+        isDark 
+          ? 'bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border-slate-800 text-white' 
+          : 'bg-gradient-to-br from-[#0b132b] via-[#1c2541] to-[#0b132b] text-white border-slate-800 shadow-xl'
+      }`}>
+        
+        {/* توهج خلفي تجميلي */}
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#1493d8]/15 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="max-w-xl space-y-3 text-center md:text-start">
-            <div className="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full border border-white/15 text-xs font-bold text-[#1493d8]">
+        <div className="relative p-6 sm:p-10 md:p-12 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-10">
+          
+          {/* النصوص الترويجية */}
+          <div className="space-y-4 max-w-xl text-center md:text-start">
+            
+            {/* وسم التحقق */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-[11px] font-bold text-sky-300">
               <ShieldCheck size={14} />
               <span>{isEn ? 'Official Verified Campus Marketplace' : 'المنصة الرسمية المعتمدة لطلاب الحرم الجامعي'}</span>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
-              UTAS MARKET <br />
-              <span className="text-[#1493d8] text-xl sm:text-3xl font-bold">
+            <div className="space-y-2">
+              <h1 className="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight text-white">
+                UTAS MARKET
+              </h1>
+              <p className="text-base sm:text-xl font-bold text-[#1493d8]">
                 {isEn ? 'Empowering Student Commerce' : 'منصة التجارة الطلابية الذكية'}
-              </span>
-            </h1>
+              </p>
+            </div>
 
-            <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-lg">
               {isEn 
                 ? 'Trade lecture notes, order fresh bites, and explore trusted peer services easily and safely.' 
                 : 'تبادل المذكرات الدراسية، اطلب المأكولات الطازجة، وتصفح خدمات زملاء الجامعة بكل سهولة وأمان.'}
             </p>
 
+            {/* أزرار التوجيه السريع */}
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
               <button
                 onClick={() => setCurrentView('explore')}
-                className="bg-[#1493d8] hover:bg-[#0f7ebc] text-white text-xs font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 transition"
+                className="px-5 py-2.5 rounded-2xl bg-[#1493d8] hover:bg-[#117bb5] text-white font-bold text-xs sm:text-sm transition flex items-center gap-2 shadow-lg active:scale-95"
               >
                 <Compass size={16} />
                 <span>{isEn ? 'Explore Market' : 'استكشف المنتجات'}</span>
@@ -87,132 +86,117 @@ export default function HomeView({ setCurrentView, onAddToCart, language = 'ar',
 
               <button
                 onClick={() => setCurrentView('stores')}
-                className="bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 transition"
+                className="px-5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs sm:text-sm border border-white/20 transition flex items-center gap-2 backdrop-blur-xs active:scale-95"
               >
                 <Store size={16} />
                 <span>{isEn ? 'Student Stores' : 'المتاجر الطلابية'}</span>
               </button>
             </div>
+
+            {/* إحصائيات سريعة تظهر في الحاسوب لإعطاء ثقل ومصداقية */}
+            <div className="hidden sm:flex items-center gap-6 pt-4 border-t border-white/10 text-xs text-slate-300">
+              <span className="flex items-center gap-1.5 font-bold">
+                <CheckCircle2 size={14} className="text-emerald-400" />
+                <span>{isEn ? 'Verified Students Only' : 'تجار معتمدون من الجامعة'}</span>
+              </span>
+              <span className="flex items-center gap-1.5 font-bold">
+                <TrendingUp size={14} className="text-sky-400" />
+                <span>{isEn ? '5% Student Support Fee' : 'عمولة رمزية 5% لدعم الأنشطة'}</span>
+              </span>
+            </div>
           </div>
 
-          <div className="shrink-0 bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xs flex items-center justify-center">
-            <UtasLogo className="h-20 sm:h-28 w-auto object-contain" />
+          {/* شعار UTAS المدمج الزجاجي (مخفي في الهاتف لتوفير المساحة) */}
+          <div className="hidden md:flex flex-col items-center justify-center p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl shrink-0">
+            <div className="p-4 bg-white rounded-2xl shadow-inner mb-3">
+              <UtasLogo className="h-16 w-auto object-contain" />
+            </div>
+            <span className="text-[11px] font-black tracking-widest text-slate-300 uppercase">UTAS Hub</span>
           </div>
+
         </div>
-      </section>
+      </div>
 
-      {/* تصنيفات سريعة */}
-      <section className="space-y-3">
-        <div className="flex justify-between items-center">
+      {/* 2. شبكة الأقسام السريعة */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
           <div>
             <h2 className="text-base sm:text-lg font-black">{isEn ? 'Quick Categories' : 'تصفح حسب اهتمامك'}</h2>
-            <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-              {isEn ? 'Handpicked categories for fast access' : 'أقسام مختارة لمساعدتك على الوصول السريع'}
-            </p>
+            <p className="text-[11px] sm:text-xs text-slate-400">{isEn ? 'Handpicked categories for fast access' : 'أقسام مختارة لمساعدتك على الوصول السريع'}</p>
           </div>
-          <button
+
+          <button 
             onClick={() => setCurrentView('categories')}
             className="text-xs font-bold text-[#1493d8] hover:underline flex items-center gap-1"
           >
             <span>{isEn ? 'View All' : 'عرض الكل'}</span>
-            {isEn ? <ArrowRight size={13} /> : <ArrowLeft size={13} />}
+            <ArrowIcon size={14} />
           </button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {quickCategories.map((item, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentView(item.action || 'categories')}
-              className={`p-3.5 rounded-2xl border text-start flex items-center gap-3 transition ${
-                isDark ? 'bg-slate-900 border-slate-800 hover:border-slate-700' : 'bg-white border-slate-200 hover:border-slate-300'
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          {quickCategories.map((cat) => (
+            <div
+              key={cat.id}
+              onClick={() => setCurrentView('categories')}
+              className={`p-4 rounded-2xl border transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:shadow-md ${
+                isDark 
+                  ? 'bg-slate-900 border-slate-800 hover:border-slate-700' 
+                  : 'bg-white border-slate-200 hover:border-sky-200 shadow-2xs'
               }`}
             >
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
-                isDark ? 'bg-slate-800 text-[#1493d8]' : 'bg-sky-50 text-[#1493d8]'
-              }`}>
-                {item.icon}
+              <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 w-fit mb-3">
+                {cat.icon}
               </div>
-              <div>
-                <h4 className="text-xs font-bold">{item.title}</h4>
-                <span className="text-[10px] text-slate-400">{isEn ? 'Browse now' : 'تصفح الآن'}</span>
-              </div>
-            </button>
+              <h3 className="text-xs font-black line-clamp-1">{cat.name}</h3>
+              <p className="text-[10px] text-slate-400 mt-0.5">{cat.sub}</p>
+            </div>
           ))}
         </div>
-      </section>
+      </div>
 
-      {/* وصل حديثاً */}
-      <section className="space-y-3">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Sparkles size={18} className="text-[#1493d8]" />
-            <h2 className="text-base sm:text-lg font-black">{isEn ? 'Recent Arrivals' : 'وصل حديثاً إلى السوق'}</h2>
+      {/* 3. المتاجر المعتمدة حديثاً */}
+      {stores.length > 0 && (
+        <div className="space-y-3 pt-2">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base sm:text-lg font-black">{isEn ? 'Featured Student Stores' : 'أحدث المتاجر الطلابية'}</h2>
+              <p className="text-[11px] sm:text-xs text-slate-400">{isEn ? 'Support your fellow campus merchants' : 'ادعم مشاريع زملائك في الحرم الجامعي'}</p>
+            </div>
+            <button 
+              onClick={() => setCurrentView('stores')}
+              className="text-xs font-bold text-[#1493d8] hover:underline flex items-center gap-1"
+            >
+              <span>{isEn ? 'All Stores' : 'كل المتاجر'}</span>
+              <ArrowIcon size={14} />
+            </button>
           </div>
-          <button
-            onClick={() => setCurrentView('explore')}
-            className="text-xs font-bold text-[#1493d8] hover:underline flex items-center gap-1"
-          >
-            <span>{isEn ? 'All Products' : 'كل المنتجات'}</span>
-            {isEn ? <ArrowRight size={13} /> : <ArrowLeft size={13} />}
-          </button>
-        </div>
 
-        {isLoading ? (
-          <div className="text-center py-12 text-xs text-slate-400">{isEn ? 'Loading products...' : 'جاري تحميل المنتجات...'}</div>
-        ) : featuredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {featuredProducts.map((p) => {
-              const pid = p._id || p.id;
-              const isAdded = addedId === pid;
-              const hasImg = p.image && (p.image.startsWith('data:') || p.image.startsWith('http'));
-
-              return (
-                <div 
-                  key={pid} 
-                  className={`rounded-2xl p-3.5 border flex flex-col justify-between transition ${
-                    isDark ? 'bg-slate-900 border-slate-800 hover:border-slate-700' : 'bg-white border-slate-200 hover:border-slate-300'
-                  }`}
-                >
-                  <div>
-                    <div className="aspect-square w-full rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 mb-2 flex items-center justify-center">
-                      {hasImg ? (
-                        <img src={p.image} alt={p.title} className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-2xl">🛍️</span>
-                      )}
-                    </div>
-                    <span className="text-[10px] text-[#1493d8] font-bold block mb-1">{p.category}</span>
-                    <h4 className="font-bold text-xs line-clamp-1">{p.title}</h4>
-                    <p className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">{p.store}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {stores.slice(0, 3).map((st) => (
+              <div 
+                key={st._id || st.email} 
+                onClick={() => setCurrentView('stores')}
+                className={`p-4 rounded-2xl border flex items-center justify-between cursor-pointer transition hover:border-[#1493d8] ${
+                  isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-2xs'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#1493d8]/10 text-[#1493d8] flex items-center justify-center font-bold">
+                    <Store size={20} />
                   </div>
-
-                  <div className="flex justify-between items-center pt-3 border-t mt-3 border-slate-100 dark:border-slate-800">
-                    <span className="font-black text-xs">{p.price}</span>
-                    <button
-                      onClick={() => handleAdd(p)}
-                      className={`text-[11px] font-bold py-1.5 px-3 rounded-lg flex items-center gap-1 transition ${
-                        isAdded 
-                          ? 'bg-emerald-600 text-white' 
-                          : isDark ? 'bg-white text-slate-900 hover:bg-slate-200' : 'bg-black text-white hover:bg-slate-800'
-                      }`}
-                    >
-                      {isAdded ? <Check size={12} /> : <ShoppingBag size={12} />}
-                      <span>{isAdded ? (isEn ? 'Added' : 'تمت الإضافة') : (isEn ? 'Add' : 'أضف للسلة')}</span>
-                    </button>
+                  <div>
+                    <h4 className="text-xs font-black">{st.storeName}</h4>
+                    <p className="text-[10px] text-slate-400 line-clamp-1">{st.storeDesc || (isEn ? 'Student Project' : 'مشروع طلابي')}</p>
                   </div>
                 </div>
-              );
-            })}
+                <ArrowIcon size={16} className="text-slate-400" />
+              </div>
+            ))}
           </div>
-        ) : (
-          <div className={`text-center py-8 rounded-2xl border border-dashed text-xs ${
-            isDark ? 'border-slate-800 text-slate-500' : 'border-slate-200 text-slate-400'
-          }`}>
-            {isEn ? 'No products uploaded yet.' : 'لا توجد منتجات معروضة حالياً.'}
-          </div>
-        )}
-      </section>
+        </div>
+      )}
+
     </div>
   );
 }
