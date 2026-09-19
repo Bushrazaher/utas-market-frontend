@@ -33,14 +33,12 @@ export default function TopBar({
   const isEn = language === 'en';
   const isDark = theme === 'dark';
 
-  // دالة تبديل الثيم
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
     localStorage.setItem('utas_theme', newTheme);
   };
 
-  // دالة تبديل اللغة
   const toggleLanguage = () => {
     const newLang = language === 'ar' ? 'en' : 'ar';
     setLanguage(newLang);
@@ -57,16 +55,18 @@ export default function TopBar({
       dir={isEn ? 'ltr' : 'rtl'}
     >
       
-      {/* 1. الجانب الأيمن: زر القائمة الجانبية والشعار */}
+      {/* 1. زر السلايد بار والشعار (ظاهر دائماً في الهاتف والحاسوب) */}
       <div className="flex items-center gap-3 shrink-0">
         <button
           onClick={toggleSidebar}
-          className={`p-2 rounded-2xl border transition md:hidden ${
-            isDark ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+          className={`p-2 sm:p-2.5 rounded-2xl border transition flex items-center justify-center cursor-pointer ${
+            isDark 
+              ? 'bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700 hover:text-white' 
+              : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
           }`}
-          title="القائمة"
+          title={isEn ? "Toggle Sidebar" : "فتح/إغلاق القائمة الجانبية"}
         >
-          <Menu size={18} />
+          <Menu size={20} />
         </button>
 
         <div 
@@ -74,13 +74,12 @@ export default function TopBar({
           className="flex items-center gap-2 cursor-pointer select-none"
         >
           <UtasLogo variant="inline" className="scale-90 sm:scale-100" />
-          <span className="text-[10px] font-black tracking-widest text-[#1493d8] uppercase hidden lg:inline">
-          
+          <span className="text-[10px] font-black tracking-widest text-[#1493d8] uppercase hidden xl:inline">
           </span>
         </div>
       </div>
 
-      {/* 2. المنتصف: شريط البحث الجامعي (يظهر في الشاشات المتوسطة والأكبر) */}
+      {/* 2. شريط البحث الجامعي */}
       <div className="hidden md:flex flex-1 max-w-md mx-2 relative">
         <Search 
           size={16} 
@@ -107,18 +106,18 @@ export default function TopBar({
         )}
       </div>
 
-      {/* شارة المشرف العليا إذا كان الحساب مشرفاً */}
+      {/* شارة المشرف */}
       {currentUser?.role === 'admin' && (
-        <div className="hidden xl:flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-black">
+        <div className="hidden 2xl:flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-black">
           <ShieldCheck size={14} />
           <span>{isEn ? 'Supervision Mode' : 'نظام الإشراف والرقابة العليا'}</span>
         </div>
       )}
 
-      {/* 3. الجانب الأيسر: زر الدارك مود، اللغة، السلة، الحساب */}
-      <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+      {/* 3. عناصر التحكم (الوضع الليلي، اللغة، السلة، الحساب) */}
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
         
-        {/* زر التبديل للوضع الليلي والنهاري (Dark / Light Mode) */}
+        {/* زر التبديل للوضع الليلي / النهاري */}
         <button
           onClick={toggleTheme}
           className={`p-2 rounded-2xl border transition flex items-center justify-center ${
@@ -128,10 +127,10 @@ export default function TopBar({
           }`}
           title={isDark ? (isEn ? 'Switch to Light Mode' : 'تفعيل الوضع النهاري') : (isEn ? 'Switch to Dark Mode' : 'تفعيل الوضع الليلي')}
         >
-          {isDark ? <Sun size={17} className="animate-spin-slow" /> : <Moon size={17} />}
+          {isDark ? <Sun size={17} /> : <Moon size={17} />}
         </button>
 
-        {/* زر تبديل اللغة */}
+        {/* زر اللغة */}
         <button
           onClick={toggleLanguage}
           className={`px-2.5 py-1.5 rounded-2xl border text-xs font-bold transition flex items-center gap-1.5 ${
@@ -139,7 +138,6 @@ export default function TopBar({
               ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700' 
               : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 shadow-2xs'
           }`}
-          title={isEn ? 'تغيير إلى العربية' : 'Switch to English'}
         >
           <Globe size={14} className="text-[#1493d8]" />
           <span>{isEn ? 'عربي' : 'EN'}</span>
@@ -158,7 +156,7 @@ export default function TopBar({
           <Bell size={17} />
         </button>
 
-        {/* زر المحفوظات */}
+        {/* زر المفضلة */}
         <button
           onClick={() => setCurrentView('saved')}
           className={`p-2 rounded-2xl border transition relative hidden sm:flex items-center justify-center ${
@@ -194,12 +192,12 @@ export default function TopBar({
           )}
         </button>
 
-        {/* حالة الحساب: تسجيل الدخول أو معلومات المستخدم */}
+        {/* الحساب */}
         {currentUser?.isLoggedIn ? (
           <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentView(currentUser.role === 'admin' ? 'admin' : currentUser.role === 'seller' ? 'seller' : 'settings')}
-              className={`px-3 py-1.5 rounded-2xl border text-xs font-black transition hidden md:flex flex-col text-right ${
+              className={`px-3 py-1.5 rounded-2xl border text-xs font-black transition hidden lg:flex flex-col text-right ${
                 isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
               }`}
             >
