@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* إخفاء أشرطة التمرير في الموقع بالكامل مع بقاء التمرير سلساً */
+html, body, #root, * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+*::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* القواعد الفيزيائية اللمسية (Tactile Micro-Interactions) */
+@layer utilities {
+  .tactile-btn {
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                box-shadow 0.18s ease, 
+                background-color 0.18s ease !important;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tactile-btn:hover {
+    transform: translateY(-1px);
+  }
+  .tactile-btn:active {
+    transform: scale(0.93) translateY(1px) !important;
+  }
+
+  .tactile-card {
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), 
+                box-shadow 0.25s ease !important;
+  }
+  .tactile-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.07), 0 4px 10px -2px rgba(0, 0, 0, 0.03);
+  }
+  .tactile-card:active {
+    transform: scale(0.98) translateY(0);
+  }
+
+  @keyframes icon-pop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.35) rotate(-6deg); }
+    70% { transform: scale(0.92) rotate(3deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+  .animate-pop {
+    animation: icon-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+}
