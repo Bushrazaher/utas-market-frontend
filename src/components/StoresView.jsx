@@ -64,25 +64,8 @@ export default function StoresView({
           <span>{isEn ? 'Back to Home' : 'الرجوع للرئيسية'}</span>
         </button>
 
-        <span className="text-xs font-bold text-slate-400">
-          {isEn ? 'Certified Campus Stores' : 'المتاجر الطلابية المعتمدة بالحرم الجامعي'}
-        </span>
+       
       </div>
-
-      {/* بنر المتاجر */}
-      <section className="relative overflow-hidden rounded-3xl bg-black text-white p-8 sm:p-12 border border-slate-900 shadow-2xl">
-        <div className="absolute top-0 right-1/4 w-80 h-80 bg-[#1493d8]/15 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="relative z-10 max-w-2xl space-y-2 text-right">
-          <h1 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
-            متاجر طلاب <span className="text-[#1493d8]">UTAS Market</span>
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-400">
-            {isEn 
-              ? 'Browse verified student projects and order directly.'
-              : 'تصفح مشاريع ومتاجر زملائك المعتمدة واطلب منتجاتهم ومذكراتهم مباشرة'}
-          </p>
-        </div>
-      </section>
 
       {/* شريط البحث في المتاجر */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">

@@ -46,26 +46,7 @@ export default function CategoriesView({ setCurrentView, onAddToCart }) {
   return (
     <div className="max-w-7xl mx-auto py-2 space-y-8" dir="rtl">
       
-      {/* بنر الصفحة الموحد */}
-      <section className="relative overflow-hidden rounded-3xl bg-black text-white p-8 sm:p-12 md:p-14 border border-slate-900 shadow-2xl">
-        <div className="absolute top-0 right-1/4 w-80 h-80 bg-[#1493d8]/15 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div className="relative z-10 max-w-2xl space-y-3 text-right">
-          <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 text-xs font-bold text-[#1493d8]">
-            <Layers size={14} />
-            <span>دليل الأقسام الجامعية</span>
-          </div>
-
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-tight">
-            تصنيفات السوق <br />
-            <span className="text-[#1493d8]">في UTAS Market</span>
-          </h1>
-
-          <p className="text-slate-400 text-xs sm:text-sm md:text-base leading-relaxed pt-1">
-            اختر التخصص أو نوع الخدمة للوصول مباشرة إلى المعروضات والخدمات المتاحة داخل الكليات.
-          </p>
-        </div>
-      </section>
+     
 
       {/* بطاقات الأقسام العريضة */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">

@@ -27,24 +27,7 @@ export default function SavedItemsView({
     <div className="max-w-7xl mx-auto py-2 space-y-8" dir="rtl">
       
       {/* بنر العنوان المطابق لثيم المنصة الصافي */}
-      <section className="relative overflow-hidden rounded-3xl bg-black text-white p-8 sm:p-12 md:p-14 border border-slate-900 shadow-2xl">
-        
-        {/* إضاءة زرقاء هادئة في الخلفية */}
-        <div className="absolute top-0 right-1/4 w-80 h-50 bg-[#1493d8]/15 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div className="relative z-10 max-w-2xl space-y-3 text-right">
-          
-          
-
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-tight">
-            قائمتك المفضلة <br />
-            <span className="text-[#1493d8]">في UTAS Market</span>
-          </h1>
-
-          
-
-        </div>
-      </section>
+     
 
       {/* شريط الإحصائية والتحكم */}
       <div className="flex items-center justify-between pb-2 border-b border-slate-200/70">

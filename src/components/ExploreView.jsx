@@ -105,15 +105,7 @@ export default function ExploreView({
         </div>
       )}
 
-      <section className="relative overflow-hidden rounded-3xl bg-black text-white p-8 sm:p-12 md:p-14 border border-slate-900 shadow-2xl">
-        <div className="absolute top-0 right-1/4 w-80 h-80 bg-[#1493d8]/15 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="relative z-10 max-w-2xl space-y-3 text-right">
-          <h1 className="text-2xl sm:text-4xl md:text-6xl font-black tracking-tight leading-tight">
-            {isEn ? 'Discover what suits you at ' : 'اكتشف ما يناسبك '}
-            <span className="text-[#1493d8]">UTAS Market</span>
-          </h1>
-        </div>
-      </section>
+    
 
       <div className="space-y-4 pt-2">
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">

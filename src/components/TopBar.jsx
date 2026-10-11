@@ -59,7 +59,7 @@ export default function TopBar({
         <div onClick={() => setCurrentView('home')} className="flex items-center gap-2 cursor-pointer select-none">
           <UtasLogo variant="inline" className="scale-90 sm:scale-100" />
           <span className="text-[10px] font-black tracking-widest text-[#1493d8] uppercase hidden xl:inline">
-            UTAS MARKET
+            
           </span>
         </div>
       </div>

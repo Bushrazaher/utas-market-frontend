@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import AnnouncementBar from './components/AnnouncementBar'; // شريط الإعلانات التفاعلي الجديد
+//import AnnouncementBar from './components/AnnouncementBar';
 import TopBar from './components/TopBar';
 import Sidebar from './components/Sidebar';
 import BottomNav from './components/BottomNav';
@@ -9,9 +9,9 @@ import CategoriesView from './components/CategoriesView';
 import StoresView from './components/StoresView';
 import StoreDetailsView from './components/StoreDetailsView';
 import ProductDetailsView from './components/ProductDetailsView';
-import SavedItemsView from './components/SavedItemsView'; //[cite: 4]
-import SettingsView from './components/SettingsView'; //[cite: 6]
-import SellerDashboard from './components/SellerDashboard'; //[cite: 5]
+import SavedItemsView from './components/SavedItemsView';
+import SettingsView from './components/SettingsView';
+import SellerDashboard from './components/SellerDashboard';
 import AdminView from './components/AdminView';
 import CartView from './components/CartView';
 import OrdersView from './components/OrdersView';
@@ -23,24 +23,55 @@ import AiAgentView from './components/AiAgentView';
 import { API_URL } from './config';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState('home');
-  const [viewHistory, setViewHistory] = useState(['home']);
+  // 1. قراءة المستخدم المحفوظ وتحديد الصفحة الابتدائية تلقائياً لمنع العودة للرئيسية
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('utas_user');
+      return saved ? JSON.parse(saved) : { isLoggedIn: false, role: 'guest' };
+    } catch {
+      return { isLoggedIn: false, role: 'guest' };
+    }
+  });
+
+  const getInitialView = () => {
+    try {
+      const saved = localStorage.getItem('utas_user');
+      if (!saved) return 'home';
+      const u = JSON.parse(saved);
+      if (u.role === 'admin') return 'admin';
+      if (u.role === 'seller' || u.storeStatus === 'pending') return 'seller';
+      return 'home';
+    } catch {
+      return 'home';
+    }
+  };
+
+  const [currentView, setCurrentView] = useState(getInitialView);
+  const [viewHistory, setViewHistory] = useState([getInitialView()]);
   const [selectedStore, setSelectedStore] = useState(null); 
+  const [selectedCategory, setSelectedCategory] = useState('الكل');
   const [activeStoreObject, setActiveStoreObject] = useState(null); 
   const [activeProduct, setActiveProduct] = useState(null); 
   
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [cart, setCart] = useState(() => JSON.parse(localStorage.getItem('utas_cart') || '[]'));
-  const [savedItems, setSavedItems] = useState(() => JSON.parse(localStorage.getItem('utas_saved') || '[]'));
+  const [cart, setCart] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('utas_cart') || '[]');
+    } catch {
+      return [];
+    }
+  });
+  const [savedItems, setSavedItems] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('utas_saved') || '[]');
+    } catch {
+      return [];
+    }
+  });
   const [stores, setStores] = useState([]);
   const [theme, setTheme] = useState(localStorage.getItem('utas_theme') || 'light');
   const [language, setLanguage] = useState(localStorage.getItem('utas_lang') || 'ar');
-
-  const [currentUser, setCurrentUser] = useState(() => {
-    const saved = localStorage.getItem('utas_user');
-    return saved ? JSON.parse(saved) : { isLoggedIn: false, role: 'guest' };
-  });
 
   const navigateSafely = (newView) => {
     if (newView !== currentView) {
@@ -63,6 +94,24 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // دالة الدخول الحصري المباشر وتحديث الصفحة دون reload
+  const handleLoginSuccess = (userData) => {
+    const user = { ...userData, isLoggedIn: true };
+    setCurrentUser(user);
+    localStorage.setItem('utas_user', JSON.stringify(user));
+    
+    if (user.role === 'admin') {
+      setViewHistory(['home', 'admin']);
+      setCurrentView('admin');
+    } else if (user.role === 'seller' || user.storeStatus === 'pending') {
+      setViewHistory(['home', 'seller']);
+      setCurrentView('seller');
+    } else {
+      setViewHistory(['home']);
+      setCurrentView('home');
+    }
+  };
+
   const handleOpenProductDetails = (product) => {
     setActiveProduct(product);
     navigateSafely('product-details');
@@ -73,20 +122,32 @@ export default function App() {
     navigateSafely('store-details');
   };
 
+  const handleSelectStoreAndExplore = (storeName) => {
+    setSelectedStore(storeName);
+    navigateSafely('explore');
+  };
+
+  const handleSelectCategoryAndExplore = (catName) => {
+    setSelectedCategory(catName);
+    navigateSafely('explore');
+  };
+
   const handleLogout = () => {
     const guest = { isLoggedIn: false, role: 'guest' };
     setCurrentUser(guest);
     localStorage.removeItem('utas_user');
+    localStorage.removeItem('utas_token');
     setViewHistory(['home']);
     setCurrentView('home');
   };
 
   const handleAddToCart = (product) => {
     setCart((prev) => {
-      const exists = prev.find((item) => (item._id || item.id) === (product._id || product.id));
+      const pId = product._id || product.id;
+      const exists = prev.find((item) => (item._id || item.id) === pId);
       if (exists) {
         return prev.map((item) =>
-          (item._id || item.id) === (product._id || product.id)
+          (item._id || item.id) === pId
             ? { ...item, quantity: (item.quantity || 1) + 1 }
             : item
         );
@@ -134,9 +195,7 @@ export default function App() {
 
   const canGoBack = viewHistory.length > 1;
 
-  // ==========================================
-  // 1. لوحة تحكم المشرف (Admin) المستقلة بالكامل
-  // ==========================================
+  // 1. لوحة المشرف المستقلة
   if (currentView === 'admin') {
     return (
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-[#0b0f19] text-white' : 'bg-slate-50 text-slate-950'}`} dir={language === 'en' ? 'ltr' : 'rtl'}>
@@ -151,9 +210,7 @@ export default function App() {
     );
   }
 
-  // ==========================================
-  // 2. لوحة تحكم التاجر / البائع المستقلة بالكامل[cite: 5]
-  // ==========================================
+  // 2. لوحة التاجر المستقلة
   if (currentView === 'seller') {
     return (
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-[#0b0f19] text-white' : 'bg-slate-50 text-slate-950'}`} dir={language === 'en' ? 'ltr' : 'rtl'}>
@@ -169,22 +226,20 @@ export default function App() {
     );
   }
 
-  // ==========================================
-  // 3. الواجهة الأساسية للمشتري والزوار
-  // ==========================================
+  // 3. واجهة الموقع الأساسية
   return (
     <div 
       className={`min-h-screen ${theme === 'dark' ? 'bg-[#0b0f19] text-white' : 'bg-slate-50 text-slate-950'}`}
       dir={language === 'en' ? 'ltr' : 'rtl'}
     >
-      {/* شريط الإعلانات العلوي المتحرك (مستوحى من سلة) */}
-      <AnnouncementBar language={language} />
+     
 
       <TopBar
         currentView={currentView}
         setCurrentView={(view) => {
           if (view === 'explore') {
             setSelectedStore(null);
+            setSelectedCategory('الكل');
           }
           navigateSafely(view);
         }}
@@ -199,6 +254,8 @@ export default function App() {
         setLanguage={setLanguage}
         theme={theme}
         setTheme={setTheme}
+        canGoBack={canGoBack}
+        onBack={handleGoBack}
       />
 
       <div className="flex">
@@ -214,7 +271,14 @@ export default function App() {
 
         <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-7xl mx-auto pb-24 md:pb-12 w-full">
           {currentView === 'home' && (
-            <HomeView setCurrentView={navigateSafely} language={language} theme={theme} stores={stores} />
+            <HomeView 
+              setCurrentView={navigateSafely} 
+              onSelectCategory={handleSelectCategoryAndExplore}
+              onSelectStore={handleSelectStoreAndExplore}
+              language={language} 
+              theme={theme} 
+              stores={stores} 
+            />
           )}
 
           {currentView === 'explore' && (
@@ -227,6 +291,8 @@ export default function App() {
               onSelectProduct={handleOpenProductDetails}
               selectedStore={selectedStore}
               setSelectedStore={setSelectedStore}
+              selectedCategory={selectedCategory}
+              setSelectedCategory={setSelectedCategory}
               language={language}
               theme={theme}
             />
@@ -240,6 +306,7 @@ export default function App() {
               onToggleSave={handleToggleSave}
               setCurrentView={navigateSafely}
               setSelectedStore={setSelectedStore}
+              onBack={handleGoBack}
               language={language}
             />
           )}
@@ -292,6 +359,8 @@ export default function App() {
               setCurrentView={navigateSafely} 
               onAddToCart={handleAddToCart} 
               onSelectProduct={handleOpenProductDetails} 
+              onSelectCategory={handleSelectCategoryAndExplore}
+              onBack={handleGoBack}
             />
           )}
 
@@ -348,7 +417,7 @@ export default function App() {
           {currentView === 'auth' && (
             <AuthView
               setCurrentView={navigateSafely}
-              setCurrentUser={setCurrentUser}
+              setCurrentUser={handleLoginSuccess}
             />
           )}
         </main>
@@ -357,6 +426,7 @@ export default function App() {
       <BottomNav 
         currentView={currentView} 
         setCurrentView={navigateSafely} 
+        cartCount={cart.reduce((sum, item) => sum + (item.quantity || 1), 0)}
         currentUser={currentUser} 
         language={language} 
         theme={theme} 
