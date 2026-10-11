@@ -8,12 +8,12 @@ import {
 import { API_URL } from '../config';
 
 export default function SellerDashboard({ currentUser, setCurrentUser, setCurrentView, onBack }) {
-  const [activeTab, setActiveTab] = useState('orders'); // orders | products | profile
+  const [activeTab, setActiveTab] = useState('orders'); // orders, products, profile
   const [isLoading, setIsLoading] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  // 1. بيانات المتجر
+  // 1. حالة بيانات المتجر والشعار
   const [storeData, setStoreData] = useState({
     storeName: currentUser?.storeName || '',
     storeDesc: currentUser?.storeDesc || '',
@@ -30,7 +30,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
 
-  // 2. نموذج إضافة منتج
+  // حالة إضافة منتج جديد
   const [newProduct, setNewProduct] = useState({
     title: '',
     price: '',
@@ -58,17 +58,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
     }
   };
 
-  // دالة رابط الواتساب بدون تداخل أقواس
-  const getWhatsappLink = (phone, name, orderNum, store) => {
-    if (!phone) return '#';
-    const cleanPhone = String(phone).replace(/\D/g, '');
-    const textMsg = encodeURIComponent(
-      'مرحباً ' + (name || 'عزيزي الطالب') + '، بخصوص طلبك #' + (orderNum || '') + ' من متجر ' + (store || '')
-    );
-    return 'https://wa.me/968' + cleanPhone + '?text=' + textMsg;
-  };
-
-  // جلب البيانات
+  // جلب المنتجات والطلبات الخاصة بهذا المتجر
   const fetchSellerData = async () => {
     setIsLoading(true);
     const headers = getHeaders();
@@ -82,6 +72,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
       if (prodRes.ok) setProducts(await prodRes.json());
       if (ordRes.ok) {
         const ordData = await ordRes.json();
+        // تصفية الطلبات الخاصة بهذا المتجر
         const filtered = Array.isArray(ordData)
           ? ordData.filter(o => o.sellerEmail === email || o.store === currentUser?.storeName)
           : [];
@@ -98,7 +89,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
     fetchSellerData();
   }, [currentUser?.storeName, currentUser?.email]);
 
-  // رفع الشعار
+  // دالة تحويل صورة اللوجو إلى Base64 ومعاينتها
   const handleLogoUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -115,7 +106,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
     reader.readAsDataURL(file);
   };
 
-  // رفع صورة المنتج
+  // دالة تحويل صورة المنتج
   const handleProductImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -127,10 +118,13 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
     reader.readAsDataURL(file);
   };
 
-  // حفظ هوية المتجر
+  // حفظ شعار وبيانات المتجر في MongoDB
   const handleSaveStoreProfile = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMsg('');
+    setFeedbackMsg('');
+
     try {
       const res = await fetch(`${API_URL}/api/seller/setup-store`, {
         method: 'PUT',
@@ -139,6 +133,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
       });
 
       const data = await res.json();
+
       if (!res.ok) {
         showNotification(data.error || 'تعذر حفظ بيانات المتجر', true);
         return;
@@ -147,15 +142,16 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
       const updatedUser = { ...currentUser, ...data.user };
       if (setCurrentUser) setCurrentUser(updatedUser);
       localStorage.setItem('utas_user', JSON.stringify(updatedUser));
-      showNotification('✅ تم حفظ شعار المتجر والبيانات بنجاح!');
+
+      showNotification('✅ تم حفظ شعار المتجر والبيانات بنجاح في قاعدة البيانات!');
     } catch (err) {
-      showNotification('تعذر الاتصال بالخادم', true);
+      showNotification('تعذر الاتصال بالخادم، تأكد من تشغيل السيرفر', true);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // إضافة منتج
+  // إضافة منتج جديد
   const handleAddProduct = async (e) => {
     e.preventDefault();
     if (!newProduct.title || !newProduct.price) {
@@ -175,7 +171,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
       });
 
       if (res.ok) {
-        showNotification('✅ تم حفظ المنتج بنجاح!');
+        showNotification('✅ تم حفظ المنتج في متجرك بنجاح!');
         setNewProduct({ title: '', price: '', category: 'مأكولات ومشروبات', desc: '', image: '', stock: 10 });
         fetchSellerData();
       } else {
@@ -203,7 +199,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
     }
   };
 
-  // تحديث حالة الطلب
+  // تغيير حالة الطلب وحفظها
   const handleUpdateOrderStatus = async (orderId, newStatus) => {
     try {
       const res = await fetch(`${API_URL}/api/orders/${orderId}/status`, {
@@ -213,7 +209,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
       });
 
       if (res.ok) {
-        showNotification('✅ تم تحديث حالة الطلب بنجاح.');
+        showNotification(`✅ تم تحديث حالة الطلب إلى "${newStatus}".`);
         fetchSellerData();
       }
     } catch {
@@ -221,7 +217,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
     }
   };
 
-  // طباعة سند التجهيز والتسليم
+  // 🖨️ دالة طباعة سند التجهيز والتسليم للتاجر (PDF)
   const handlePrintSellerInvoice = (order) => {
     const printWindow = window.open('', '_blank', 'width=850,height=900');
     if (!printWindow) return alert('يرجى السماح بالنوافذ المنبثقة.');
@@ -234,13 +230,6 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
     const itemsList = order.items && order.items.length > 0
       ? order.items
       : [{ title: order.productName || 'منتج', quantity: 1, price: subtotal }];
-
-    const tableRows = itemsList.map((i) => {
-      const title = i.title || i.name || 'منتج';
-      const qty = i.quantity || 1;
-      const unitPrice = Number(i.price).toFixed(3);
-      return '<tr><td><strong>' + title + '</strong></td><td style="text-align:center;">' + qty + '</td><td style="text-align:left;">' + unitPrice + ' ر.ع</td></tr>';
-    }).join('');
 
     const html = `
       <!DOCTYPE html>
@@ -269,7 +258,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
           <div class="top">
             <div>
               <div class="title">📦 إشعار تجهيز وتسليم طلب (نسخة التاجر)</div>
-              <p style="font-size: 13px; color: #1877F2; font-weight: bold; margin-top: 4px;">متجر: ${order.store || ''}</p>
+              <p style="font-size: 13px; color: #1877F2; font-weight: bold; margin-top: 4px;">متجر: ${order.store}</p>
             </div>
             <div class="meta">
               <p><strong>رقم الطلب:</strong> #${orderNum}</p>
@@ -298,7 +287,13 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
               </tr>
             </thead>
             <tbody>
-              ${tableRows}
+              ${itemsList.map(i => `
+                <tr>
+                  <td><strong>${i.title || i.name}</strong></td>
+                  <td style="text-align: center;">${i.quantity || 1}</td>
+                  <td style="text-align: left;">${Number(i.price).toFixed(3)} ر.ع</td>
+                </tr>
+              `).join('')}
             </tbody>
           </table>
           <div class="finances">
@@ -405,7 +400,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
       {/* محتوى اللوحة */}
       <main className="flex-1 p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-6">
 
-        {/* 1. تبويب الطلبات الواردة */}
+        {/* 1. تبويب الطلبات الواردة مع سندات الطباعة والتواصل عبر واتساب */}
         {activeTab === 'orders' && (
           <div className="space-y-4 animate-in fade-in">
             <div className="flex items-center justify-between">
@@ -420,7 +415,6 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
                 {orders.map((o) => {
                   const subtotal = Number(o.subtotal || o.totalPrice || 0);
                   const netProfit = (subtotal * 0.95).toFixed(3);
-                  const waUrl = getWhatsappLink(o.buyerPhone, o.buyerName, o.orderNumber, o.store);
 
                   return (
                     <div key={o._id} className="bg-white/5 border border-white/10 rounded-3xl p-5 sm:p-6 space-y-4 hover:border-white/20 transition">
@@ -441,9 +435,10 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
 
                         {/* أزرار الإجراءات للتاجر */}
                         <div className="flex items-center gap-2">
+                          {/* زر واتساب السريع */}
                           {o.buyerPhone && (
                             <a
-                              href={waUrl}
+                              href={`https://wa.me/968${o.buyerPhone.replace(/\D/g, '')}?text=${encodeURIComponent(`مرحباً ${o.buyerName}، بخصوص طلبك #${o.orderNumber || ''} من متجر ${o.store}...`)}`}
                               target="_blank"
                               rel="noreferrer"
                               className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white rounded-xl text-xs font-bold transition border border-emerald-500/30"
@@ -454,6 +449,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
                             </a>
                           )}
 
+                          {/* زر طباعة سند التجهيز والتسليم */}
                           <button
                             onClick={() => handlePrintSellerInvoice(o)}
                             className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white/10 hover:bg-[#1877F2] text-slate-200 hover:text-white rounded-xl text-xs font-bold transition"
@@ -528,6 +524,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
         {/* 2. تبويب المنتجات */}
         {activeTab === 'products' && (
           <div className="space-y-6 animate-in fade-in">
+            {/* إضافة منتج جديد */}
             <form onSubmit={handleAddProduct} className="bg-white/5 border border-white/10 rounded-3xl p-6 space-y-4">
               <h3 className="font-bold text-sm text-white flex items-center gap-2">
                 <Plus size={16} className="text-sky-400" />
@@ -571,6 +568,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
               </div>
             </form>
 
+            {/* قائمة المنتجات المعروضة */}
             <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {products.map(p => (
                 <div key={p._id || p.id} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col justify-between gap-3 group">
@@ -606,6 +604,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
             </div>
 
             <form onSubmit={handleSaveStoreProfile} className="space-y-6">
+              
               <div className="p-5 bg-black/40 border border-white/10 rounded-2xl flex flex-col sm:flex-row items-center gap-6">
                 <div className="relative group shrink-0">
                   <div className="w-24 h-24 rounded-2xl bg-white/10 border-2 border-dashed border-white/20 overflow-hidden flex items-center justify-center shadow-lg">
