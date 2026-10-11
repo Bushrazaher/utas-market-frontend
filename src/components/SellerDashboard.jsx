@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Store, Package, ShoppingCart, Settings, Plus, 
+  Store, Package, ShoppingCart, Plus, 
   Upload, CheckCircle2, ArrowRight, Trash2, RefreshCw, 
-  DollarSign, TrendingUp, Phone, Clock, MapPin, Eye, AlertCircle,
+  DollarSign, Phone, MapPin, AlertCircle,
   Printer, MessageCircle
 } from 'lucide-react';
 import { API_URL } from '../config';
 
 export default function SellerDashboard({ currentUser, setCurrentUser, setCurrentView, onBack }) {
-  const [activeTab, setActiveTab] = useState('orders'); // orders | products | profile
+  const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'products' | 'profile'
   const [isLoading, setIsLoading] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
@@ -58,17 +58,17 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
     }
   };
 
-  // دالة رابط الواتساب بدون تداخل أقواس
+  // توليد رابط الواتساب بشكل آمن
   const getWhatsappLink = (phone, name, orderNum, store) => {
     if (!phone) return '#';
     const cleanPhone = String(phone).replace(/\D/g, '');
     const textMsg = encodeURIComponent(
-      'مرحباً ' + (name || 'عزيزي الطالب') + '، بخصوص طلبك #' + (orderNum || '') + ' من متجر ' + (store || '')
+      `مرحباً ${name || 'عزيزي الطالب'}، بخصوص طلبك #${orderNum || ''} من متجر ${store || ''}`
     );
-    return 'https://wa.me/968' + cleanPhone + '?text=' + textMsg;
+    return `https://wa.me/968${cleanPhone}?text=${textMsg}`;
   };
 
-  // جلب البيانات
+  // جلب البيانات الخاصة بالبائع
   const fetchSellerData = async () => {
     setIsLoading(true);
     const headers = getHeaders();
@@ -127,7 +127,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
     reader.readAsDataURL(file);
   };
 
-  // حفظ هوية المتجر
+  // حفظ هوية وبيانات المتجر
   const handleSaveStoreProfile = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -155,7 +155,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
     }
   };
 
-  // إضافة منتج
+  // إضافة منتج جديد
   const handleAddProduct = async (e) => {
     e.preventDefault();
     if (!newProduct.title || !newProduct.price) {
@@ -226,7 +226,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
     const printWindow = window.open('', '_blank', 'width=850,height=900');
     if (!printWindow) return alert('يرجى السماح بالنوافذ المنبثقة.');
 
-    const orderNum = order.orderNumber || order._id.slice(-6);
+    const orderNum = order.orderNumber || (order._id ? order._id.slice(-6) : '0000');
     const subtotal = Number(order.subtotal || order.totalPrice || 0);
     const platformFee = Number(order.platformFee || (subtotal * 0.05)).toFixed(3);
     const netSellerProfit = Number(subtotal - platformFee).toFixed(3);
@@ -238,8 +238,8 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
     const tableRows = itemsList.map((i) => {
       const title = i.title || i.name || 'منتج';
       const qty = i.quantity || 1;
-      const unitPrice = Number(i.price).toFixed(3);
-      return '<tr><td><strong>' + title + '</strong></td><td style="text-align:center;">' + qty + '</td><td style="text-align:left;">' + unitPrice + ' ر.ع</td></tr>';
+      const unitPrice = Number(i.price || 0).toFixed(3);
+      return `<tr><td><strong>${title}</strong></td><td style="text-align:center;">${qty}</td><td style="text-align:left;">${unitPrice} ر.ع</td></tr>`;
     }).join('');
 
     const html = `
@@ -429,7 +429,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
                       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/10">
                         <div className="flex items-center gap-3">
                           <span className="font-mono font-black text-sm text-[#1877F2]">
-                            #{o.orderNumber || o._id.slice(-6)}
+                            #{o.orderNumber || (o._id ? o._id.slice(-6) : '0000')}
                           </span>
                           <span className="text-xs bg-white/10 px-3 py-1 rounded-xl text-slate-300">
                             الطالب: <strong className="text-white">{o.buyerName || 'طالب جامعي'}</strong>
@@ -554,7 +554,7 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
                   type="number"
                   placeholder="الكمية المتوفرة (المخزون)"
                   value={newProduct.stock}
-                  onChange={e => setNewProduct({ ...newProduct, stock: parseInt(e.target.value) })}
+                  onChange={e => setNewProduct({ ...newProduct, stock: parseInt(e.target.value) || 0 })}
                   className="bg-black/40 border border-white/15 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[#1877F2]"
                 />
               </div>
