@@ -706,5 +706,5 @@ export default function SellerDashboard({ currentUser, setCurrentUser, setCurren
 
       </main>
     </div>
-  );
+  );    
 }
