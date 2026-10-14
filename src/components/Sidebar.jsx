@@ -27,6 +27,31 @@ export default function Sidebar({
   const isEn = language === 'en';
   const isDark = theme === 'dark';
 
+  // معالجة تسجيل الخروج بشكل ذاتي ومباشر 100%
+  const handleLogoutAction = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    try {
+      localStorage.removeItem('utas_user');
+      localStorage.removeItem('utas_token');
+    } catch (err) {
+      console.error(err);
+    }
+
+    if (setIsOpen) setIsOpen(false);
+
+    if (typeof onLogout === 'function') {
+      onLogout();
+    } else {
+      if (typeof setCurrentView === 'function') {
+        setCurrentView('home');
+      }
+      window.location.reload();
+    }
+  };
+
   const menuItems = [
     { id: 'home', label: isEn ? 'Home' : 'الرئيسية', icon: <Home size={18} /> },
     { id: 'explore', label: isEn ? 'Explore' : 'استكشف المنتجات', icon: <Compass size={18} /> },
@@ -35,7 +60,7 @@ export default function Sidebar({
     { id: 'saved', label: isEn ? 'Wishlist' : 'المفضلة', icon: <Heart size={18} /> },
     { id: 'orders', label: isEn ? 'My Orders' : 'طلباتي', icon: <Package size={18} /> },
     { id: 'settings', label: isEn ? 'Settings' : 'الإعدادات', icon: <Settings size={18} /> },
-    { id: 'ai-agent', label: isEn ? 'Nasr AI' : 'المساعد أحمد', icon: <Sparkles size={18} className="text-[#1493d8]" /> },
+    { id: 'ai-agent', label: isEn ? 'Nasr AI' : 'المساعد نصر', icon: <Sparkles size={18} className="text-[#1493d8]" /> },
   ];
 
   return (
@@ -139,15 +164,17 @@ export default function Sidebar({
                 </span>
               </div>
               <button
-                onClick={onLogout}
-                className="p-2 text-slate-400 hover:text-red-500 rounded-xl transition"
+                type="button"
+                onClick={handleLogoutAction}
+                className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition cursor-pointer"
                 title={isEn ? 'Logout' : 'تسجيل الخروج'}
               >
-                <LogOut size={16} />
+                <LogOut size={18} />
               </button>
             </div>
           ) : (
             <button
+              type="button"
               onClick={() => {
                 setCurrentView('auth');
                 if (window.innerWidth < 768) setIsOpen(false);
