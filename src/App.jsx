@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+//import AnnouncementBar from './components/AnnouncementBar';
 import TopBar from './components/TopBar';
 import Sidebar from './components/Sidebar';
 import BottomNav from './components/BottomNav';
@@ -20,39 +21,6 @@ import AuthView from './components/AuthView';
 import NasrAiWidget from './components/NasrAiWidget';
 import AiAgentView from './components/AiAgentView';
 import { API_URL } from './config';
-
-// ==========================================
-// شريط التنبيه التجريبي العلوي
-// ==========================================
-function DemoBanner({ language }) {
-  const [show, setShow] = useState(true);
-
-  if (!show) return null;
-
-  return (
-    <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white text-xs sm:text-sm font-medium py-2.5 px-4 shadow-sm relative z-50">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 flex-1 justify-center text-center">
-          <span className="bg-white/20 px-2 py-0.5 rounded text-[11px] font-bold tracking-wide">
-            {language === 'en' ? 'Demo Phase' : 'إطلاق تجريبي'}
-          </span>
-          <span>
-            {language === 'en'
-              ? 'Notice: UTAS Market is currently in demo phase. Products and stores shown are samples. Real student businesses can now register!'
-              : '📢 تنويه: منصة UTAS Market في مرحلة الإطلاق التجريبي، المنتجات والمتاجر المعروضة حالياً هي نماذج افتراضية. التسجيل متاح الآن للمشاريع والمتاجر الطلابية الحقيقية!'}
-          </span>
-        </div>
-        <button
-          onClick={() => setShow(false)}
-          className="text-white/80 hover:text-white hover:bg-white/20 p-1 rounded transition text-xs flex-shrink-0"
-          title={language === 'en' ? 'Close' : 'إغلاق'}
-        >
-          ✕
-        </button>
-      </div>
-    </div>
-  );
-}
 
 export default function App() {
   // 1. قراءة المستخدم المحفوظ وتحديد الصفحة الابتدائية تلقائياً لمنع العودة للرئيسية
@@ -264,8 +232,7 @@ export default function App() {
       className={`min-h-screen ${theme === 'dark' ? 'bg-[#0b0f19] text-white' : 'bg-slate-50 text-slate-950'}`}
       dir={language === 'en' ? 'ltr' : 'rtl'}
     >
-      {/* شريط التنبيه التجريبي يظهر أعلى الصفحة دائماً */}
-      <DemoBanner language={language} />
+     
 
       <TopBar
         currentView={currentView}
@@ -292,7 +259,15 @@ export default function App() {
       />
 
       <div className="flex">
-        <Sidebar currentUser="{currentUser}" currentView="{currentView}" isOpen="{isSidebarOpen}" language="{language}" onLogout="{handleLogout}" setCurrentView="{navigateSafely}" setIsOpen="{setIsSidebarOpen}" theme="{theme}"/>
+        <Sidebar
+          isOpen={isSidebarOpen}
+          setIsOpen={setIsSidebarOpen}
+          currentView={currentView}
+          setCurrentView={navigateSafely}
+          currentUser={currentUser}
+          language={language}
+          theme={theme}
+        />
 
         <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-7xl mx-auto pb-24 md:pb-12 w-full">
           {currentView === 'home' && (
