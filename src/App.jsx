@@ -292,15 +292,7 @@ export default function App() {
       />
 
       <div className="flex">
-        <Sidebar
-          isOpen={isSidebarOpen}
-          setIsOpen={setIsSidebarOpen}
-          currentView={currentView}
-          setCurrentView={navigateSafely}
-          currentUser={currentUser}
-          language={language}
-          theme={theme}
-        />
+        <Sidebar currentUser="{currentUser}" currentView="{currentView}" isOpen="{isSidebarOpen}" language="{language}" onLogout="{handleLogout}" setCurrentView="{navigateSafely}" setIsOpen="{setIsSidebarOpen}" theme="{theme}"/>
 
         <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-7xl mx-auto pb-24 md:pb-12 w-full">
           {currentView === 'home' && (
